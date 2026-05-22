@@ -47,6 +47,9 @@ async function loadMissions() {
   } catch {
     state.missions = [];
   }
+  if (!state.mission && state.missions.length > 0) {
+    state.mission = state.missions[0].name;
+  }
   refreshFilterButtons();
 }
 
@@ -331,15 +334,17 @@ function renderResults() {
 }
 
 function buildCard(group) {
-  const { representativeAnswer, count, documents = [] } = group;
+  const { groupTitle, representativeAnswer, count, documents = [], reviewerSections = [] } = group;
 
-  // reviewers는 문서별 string[] — 중복 제거 후 최대 3명 표시
-  const reviewerIds = [...new Set(documents.flatMap((d) => d.reviewers ?? []))].slice(0, 3);
-  const avatars = reviewerIds
-    .map((id) => `<img src="https://github.com/${id}.png?size=96" class="w-10 h-10 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${reviewerNickname(id)}">`)
+  // reviewerSections에서 리뷰어 정보 추출 (최대 3명), 없으면 documents 폴백
+  const sections = reviewerSections.slice(0, 3);
+  const avatars = sections
+    .map((s) => `<img src="https://github.com/${s.reviewer}.png?size=96" class="w-10 h-10 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${s.nickname ?? s.reviewer}">`)
     .join('');
 
-  const nameList = reviewerIds.map((id) => `'${reviewerNickname(id)}'`).join(', ');
+  const nameList = sections
+    .map((s) => `'${s.nickname ?? reviewerNickname(s.reviewer)}'`)
+    .join(', ');
   const githubUrl = documents[0]?.githubUrl ?? '#';
   const missionSlug = documents[0]?.mission ?? '';
   const missionName = missionSlug ? missionDisplayName(missionSlug) : '전체';
@@ -378,6 +383,7 @@ function buildCard(group) {
           GitHub PR 보기
         </a>
       </div>
+      ${groupTitle ? `<p class="text-[14px] font-semibold text-[#1A1A1A] mb-3">${groupTitle}</p>` : ''}
       <div class="bg-[#F8F9FA] p-5 rounded-2xl">
         <div class="prose prose-sm max-w-none prose-p:text-[#333333] prose-headings:text-[#1A1A1A] prose-code:text-[#1A1A1A] prose-pre:bg-[#EEEEEE]">
           ${content}
