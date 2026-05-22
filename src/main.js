@@ -247,7 +247,7 @@ async function performSearch() {
       query: state.search,
       track: state.track,
       mission: state.mission,
-      limit: 5,
+      limit: 20,
     });
     state.results = results;
     state.loading = false;
@@ -361,6 +361,35 @@ function buildCard(group) {
        </div>`
     : '';
 
+  // 카드 하단 리뷰어 목록 — reviewerSections 전체 표시
+  const reviewerFooter = reviewerSections.length > 0
+    ? `<div class="mt-4 pt-4 border-t border-[#EEEEEE] flex flex-col gap-1">
+        ${reviewerSections.map((s) => {
+          const name = s.nickname ?? reviewerNickname(s.reviewer);
+          return s.comments.map((c, i) => `
+            <div class="flex items-center justify-between py-1.5">
+              <div class="flex items-center gap-2">
+                <img src="https://github.com/${s.reviewer}.png?size=96"
+                     class="w-7 h-7 rounded-full shrink-0" alt="${name}">
+                <span class="text-[13px] font-semibold text-[#1A1A1A]">${name}</span>
+                ${s.comments.length > 1
+                  ? `<span class="text-[11px] text-[#999999]">${i + 1}번째 답변</span>`
+                  : ''}
+                ${c.prTitle
+                  ? `<span class="text-[12px] text-[#AAAAAA] truncate max-w-[200px]">${c.prTitle}</span>`
+                  : ''}
+              </div>
+              <a href="${c.githubUrl}" target="_blank" rel="noopener noreferrer"
+                 class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#F5F5F7] text-[12px] font-semibold text-[#555555] hover:bg-black hover:text-white transition-all whitespace-nowrap shrink-0">
+                <i class="fa-brands fa-github"></i>
+                GitHub PR 보기
+              </a>
+            </div>
+          `).join('');
+        }).join('')}
+      </div>`
+    : '';
+
   return `
     <div class="group p-6 bg-white border border-[#EEEEEE] rounded-[20px] hover:border-black hover:shadow-xl transition-all duration-300">
       <div class="flex items-start justify-between mb-5">
@@ -373,15 +402,6 @@ function buildCard(group) {
             <p class="text-[13px] text-[#999999] mt-0.5">비슷한 답변 ${count}건 • ${missionName} 미션</p>
           </div>
         </div>
-        <a
-          href="${githubUrl}"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="flex items-center gap-2 px-4 py-2 rounded-full bg-[#F5F5F7] text-[13px] font-semibold group-hover:bg-black group-hover:text-white transition-all whitespace-nowrap shrink-0"
-        >
-          <i class="fa-brands fa-github"></i>
-          GitHub PR 보기
-        </a>
       </div>
       ${groupTitle ? `<p class="text-[14px] font-semibold text-[#1A1A1A] mb-3">${groupTitle}</p>` : ''}
       <div class="bg-[#F8F9FA] p-5 rounded-2xl">
@@ -389,6 +409,7 @@ function buildCard(group) {
           ${content}
         </div>
       </div>
+      ${reviewerFooter}
     </div>
   `;
 }
