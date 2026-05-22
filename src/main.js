@@ -1,6 +1,9 @@
 import './style.css';
+import { marked } from 'marked';
 import { searchReviews, getTracks, getMissions } from './api.js';
 import { trackLabel, missionDisplayName, missionIcon, FALLBACK_TRACKS, reviewerNickname } from './data.js';
+
+marked.use({ gfm: true, breaks: true });
 
 const PAGE_SIZE = 5;
 
@@ -51,56 +54,68 @@ async function loadMissions() {
 
 function buildLayout() {
   return `
-    <div class="w-[1440px] min-h-screen bg-white text-[#1A1A1A] mx-auto">
-      <header class="sticky top-0 z-50 w-full h-[80px] bg-white/80 backdrop-blur-md border-b border-[#EEEEEE] flex items-center justify-between px-[80px]">
+    <div class="max-w-[1000px] w-full min-h-screen bg-white text-[#1A1A1A] mx-auto">
+      <header class="sticky top-0 z-50 w-full h-[72px] bg-white/80 backdrop-blur-md border-b border-[#EEEEEE] flex items-center justify-between px-[40px]">
         <div class="flex items-center gap-2">
-          <div class="w-10 h-10 bg-black rounded-xl flex items-center justify-center">
-            <i class="fa-solid fa-code-pull-request text-white text-xl"></i>
+          <div class="w-9 h-9 bg-black rounded-xl flex items-center justify-center">
+            <i class="fa-solid fa-code-pull-request text-white text-lg"></i>
           </div>
-          <span class="text-xl font-bold tracking-tight">PR Insight</span>
+          <span class="text-lg font-bold tracking-tight">PR Insight</span>
         </div>
       </header>
 
-      <main class="px-[80px] py-[60px]">
-        <section class="mb-[64px]">
-          <h1 class="text-[42px] font-bold mb-4 leading-tight">리뷰어들은 이 질문에<br>어떻게 답변했을까요?</h1>
-          <p class="text-[18px] text-[#666666] mb-10">키워드를 입력하여 수천 개의 PR 속에 담긴 리뷰어의 인사이트를 찾아보세요.</p>
-          <div class="relative w-full max-w-[800px]">
-            <i class="fa-solid fa-magnifying-glass absolute left-6 top-1/2 -translate-y-1/2 text-[#999999] text-xl"></i>
-            <input
-              id="search-input"
-              type="text"
-              placeholder="궁금한 키워드를 입력하세요 (예: 예외 처리, 트랜잭션, 컴포넌트 분리)"
-              class="w-full h-[72px] bg-[#F5F5F7] rounded-2xl pl-[64px] pr-6 text-[18px] focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
-            >
+      <main class="px-[40px] py-[48px]">
+        <section class="mb-[40px]">
+          <h1 class="text-[38px] font-bold mb-3 leading-tight">리뷰어들은 이 질문에<br>어떻게 답변했을까요?</h1>
+          <p class="text-[16px] text-[#666666]">키워드를 입력하여 수천 개의 PR 속에 담긴 리뷰어의 인사이트를 찾아보세요.</p>
+        </section>
+
+        <section class="grid grid-cols-2 gap-10 mb-[40px]">
+          <div>
+            <h3 class="text-[13px] font-bold text-[#999999] uppercase tracking-wider mb-3">분야 선택</h3>
+            <div id="field-buttons" class="flex gap-2"></div>
+          </div>
+          <div>
+            <h3 class="text-[13px] font-bold text-[#999999] uppercase tracking-wider mb-3">질문할 미션 선택</h3>
+            <div id="mission-buttons" class="flex gap-2 flex-wrap"></div>
           </div>
         </section>
 
-        <section class="grid grid-cols-2 gap-12 mb-[80px]">
-          <div>
-            <h3 class="text-[14px] font-bold text-[#999999] uppercase tracking-wider mb-4">분야 선택</h3>
-            <div id="field-buttons" class="flex gap-3"></div>
-          </div>
-          <div>
-            <h3 class="text-[14px] font-bold text-[#999999] uppercase tracking-wider mb-4">질문할 미션 선택</h3>
-            <div id="mission-buttons" class="flex gap-3 flex-wrap"></div>
+        <section class="mb-[48px]">
+          <div class="flex gap-3 w-full">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-[#999999] text-lg"></i>
+              <input
+                id="search-input"
+                type="text"
+                placeholder="궁금한 키워드를 입력하세요 (예: 예외 처리, 트랜잭션, 컴포넌트 분리)"
+                class="w-full h-[64px] bg-[#F5F5F7] rounded-2xl pl-[52px] pr-5 text-[16px] focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
+              >
+            </div>
+            <button
+              id="search-btn"
+              disabled
+              class="h-[64px] px-8 rounded-2xl bg-black text-white font-semibold text-[16px] transition-all hover:bg-[#222] disabled:bg-[#CCCCCC] disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              탐색
+            </button>
           </div>
         </section>
 
         <section id="results-section">
-          <div class="flex items-center justify-between mb-8">
-            <h2 id="results-title" class="text-[24px] font-bold"></h2>
-            <div id="sort-bar" class="hidden flex items-center gap-2 text-[14px] text-[#666666]">
+          <div class="flex items-center justify-between mb-6">
+            <h2 id="results-title" class="text-[22px] font-bold"></h2>
+            <div id="sort-bar" class="hidden flex items-center gap-2 text-[13px] text-[#666666]">
               <span class="font-medium text-black">최신순</span>
               <span class="text-[#EEEEEE]">|</span>
               <span>정확도순</span>
             </div>
           </div>
-          <div id="results-grid" class="grid grid-cols-1 gap-6"></div>
-          <div class="mt-12 flex justify-center">
+          <div id="results-grid" class="grid grid-cols-1 gap-5"></div>
+          <div class="mt-8 flex justify-center">
             <button
               id="load-more-btn"
-              class="px-10 py-4 border border-[#EEEEEE] rounded-2xl font-semibold text-[#666666] hover:bg-[#F5F5F7] transition-all hidden"
+              class="px-8 py-3 border border-[#EEEEEE] rounded-2xl font-semibold text-[#666666] hover:bg-[#F5F5F7] transition-all hidden"
             >
               결과 더보기
             </button>
@@ -108,29 +123,29 @@ function buildLayout() {
         </section>
       </main>
 
-      <footer class="mt-[100px] border-t border-[#EEEEEE] px-[80px] py-[60px] bg-white">
+      <footer class="mt-[80px] border-t border-[#EEEEEE] px-[40px] py-[48px] bg-white">
         <div class="flex justify-between items-start">
           <div>
-            <div class="flex items-center gap-2 mb-6">
-              <div class="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-                <i class="fa-solid fa-code-pull-request text-white text-sm"></i>
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 bg-black rounded-lg flex items-center justify-center">
+                <i class="fa-solid fa-code-pull-request text-white text-xs"></i>
               </div>
-              <span class="text-lg font-bold">PR Insight</span>
+              <span class="text-base font-bold">PR Insight</span>
             </div>
-            <p class="text-[#999999] text-[14px]">© 2026 PR Insight. 모든 리뷰 데이터는 공개된 GitHub PR을 기반으로 합니다.</p>
+            <p class="text-[#999999] text-[13px]">© 2026 PR Insight. 모든 리뷰 데이터는 공개된 GitHub PR을 기반으로 합니다.</p>
           </div>
-          <div class="flex gap-16">
+          <div class="flex gap-12">
             <div>
-              <h4 class="font-bold mb-4">서비스</h4>
-              <ul class="text-[#666666] text-[14px] space-y-2">
+              <h4 class="font-bold mb-3 text-[15px]">서비스</h4>
+              <ul class="text-[#666666] text-[13px] space-y-2">
                 <li><a href="#" class="hover:text-[#1A1A1A] transition-colors">미션 목록</a></li>
                 <li><a href="#" class="hover:text-[#1A1A1A] transition-colors">리뷰어 랭킹</a></li>
                 <li><a href="#" class="hover:text-[#1A1A1A] transition-colors">인사이트 리포트</a></li>
               </ul>
             </div>
             <div>
-              <h4 class="font-bold mb-4">고객지원</h4>
-              <ul class="text-[#666666] text-[14px] space-y-2">
+              <h4 class="font-bold mb-3 text-[15px]">고객지원</h4>
+              <ul class="text-[#666666] text-[13px] space-y-2">
                 <li><a href="#" class="hover:text-[#1A1A1A] transition-colors">이용안내</a></li>
                 <li><a href="#" class="hover:text-[#1A1A1A] transition-colors">문의하기</a></li>
                 <li><a href="#" class="hover:text-[#1A1A1A] transition-colors">개인정보처리방침</a></li>
@@ -151,7 +166,7 @@ function buildFieldButtons() {
       const active = state.track === track;
       return `<button
         data-track="${track}"
-        class="field-btn px-8 py-4 rounded-xl font-semibold text-[16px] transition-all ${
+        class="field-btn px-6 py-3 rounded-xl font-semibold text-[15px] transition-all ${
           active
             ? 'bg-black text-white'
             : 'bg-white border border-[#EEEEEE] text-[#666666] hover:bg-[#F5F5F7]'
@@ -167,13 +182,13 @@ function buildMissionButtons() {
       const active = state.mission === name;
       return `<button
         data-mission="${name}"
-        class="mission-btn px-6 py-4 rounded-xl font-semibold text-[16px] flex items-center gap-2 transition-all ${
+        class="mission-btn px-5 py-3 rounded-xl font-semibold text-[15px] flex items-center gap-2 transition-all ${
           active
             ? 'bg-[#F5F5F7] border border-transparent text-[#1A1A1A]'
             : 'bg-white border border-[#EEEEEE] text-[#666666] hover:bg-[#F5F5F7]'
         }"
       >
-        <i class="fa-solid ${missionIcon(name)} text-[14px]"></i>
+        <i class="fa-solid ${missionIcon(name)} text-[13px]"></i>
         ${missionDisplayName(name)}
       </button>`;
     })
@@ -185,6 +200,20 @@ function refreshFilterButtons() {
   const missionEl = document.getElementById('mission-buttons');
   if (fieldEl) fieldEl.innerHTML = buildFieldButtons();
   if (missionEl) missionEl.innerHTML = buildMissionButtons();
+  updateSearchButton();
+}
+
+function updateSearchButton() {
+  const btn = document.getElementById('search-btn');
+  if (btn) btn.disabled = !state.mission;
+}
+
+function triggerSearch() {
+  if (!state.mission) return;
+  const input = document.getElementById('search-input');
+  state.search = input?.value.trim() ?? '';
+  state.results = null;
+  performSearch();
 }
 
 // ─── 검색 ────────────────────────────────────────────────────────────────────
@@ -192,6 +221,7 @@ function refreshFilterButtons() {
 let searchAbortController = null;
 
 async function performSearch() {
+  if (!state.mission) return;
   if (!state.search) {
     state.results = null;
     state.error = null;
@@ -240,9 +270,9 @@ function renderResults() {
     titleEl.innerHTML = '';
     sortBar.classList.add('hidden');
     gridEl.innerHTML = `
-      <div class="py-20 text-center">
-        <i class="fa-solid fa-magnifying-glass text-5xl text-[#CCCCCC] mb-4 block"></i>
-        <p class="text-[18px] text-[#999999]">궁금한 키워드를 검색해 리뷰어의 인사이트를 확인해보세요.</p>
+      <div class="py-16 text-center">
+        <i class="fa-solid fa-magnifying-glass text-4xl text-[#CCCCCC] mb-4 block"></i>
+        <p class="text-[16px] text-[#999999]">궁금한 키워드를 검색해 리뷰어의 인사이트를 확인해보세요.</p>
       </div>
     `;
     loadMoreBtn.classList.add('hidden');
@@ -254,9 +284,9 @@ function renderResults() {
     titleEl.innerHTML = `'${state.search}'에 대한 리뷰어의 답변`;
     sortBar.classList.add('hidden');
     gridEl.innerHTML = `
-      <div class="py-20 text-center">
-        <div class="w-10 h-10 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p class="text-[18px] text-[#999999]">리뷰어의 인사이트를 불러오는 중...</p>
+      <div class="py-16 text-center">
+        <div class="w-9 h-9 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-[16px] text-[#999999]">리뷰어의 인사이트를 불러오는 중...</p>
       </div>
     `;
     loadMoreBtn.classList.add('hidden');
@@ -268,10 +298,10 @@ function renderResults() {
     titleEl.innerHTML = `'${state.search}'에 대한 리뷰어의 답변`;
     sortBar.classList.add('hidden');
     gridEl.innerHTML = `
-      <div class="py-20 text-center">
-        <i class="fa-solid fa-triangle-exclamation text-5xl text-[#CCCCCC] mb-4 block"></i>
-        <p class="text-[18px] text-[#999999]">검색 중 오류가 발생했습니다.</p>
-        <p class="text-[14px] text-[#CCCCCC] mt-2">${state.error}</p>
+      <div class="py-16 text-center">
+        <i class="fa-solid fa-triangle-exclamation text-4xl text-[#CCCCCC] mb-4 block"></i>
+        <p class="text-[16px] text-[#999999]">검색 중 오류가 발생했습니다.</p>
+        <p class="text-[13px] text-[#CCCCCC] mt-2">${state.error}</p>
       </div>
     `;
     loadMoreBtn.classList.add('hidden');
@@ -288,9 +318,9 @@ function renderResults() {
 
   if (visible.length === 0) {
     gridEl.innerHTML = `
-      <div class="py-20 text-center">
-        <i class="fa-regular fa-comment-dots text-5xl text-[#CCCCCC] mb-4 block"></i>
-        <p class="text-[18px] text-[#999999]">해당 조건에 맞는 리뷰 데이터가 없습니다.</p>
+      <div class="py-16 text-center">
+        <i class="fa-regular fa-comment-dots text-4xl text-[#CCCCCC] mb-4 block"></i>
+        <p class="text-[16px] text-[#999999]">해당 조건에 맞는 리뷰 데이터가 없습니다.</p>
       </div>
     `;
   } else {
@@ -306,34 +336,35 @@ function buildCard(group) {
   // reviewers는 문서별 string[] — 중복 제거 후 최대 3명 표시
   const reviewerIds = [...new Set(documents.flatMap((d) => d.reviewers ?? []))].slice(0, 3);
   const avatars = reviewerIds
-    .map((id) => `<img src="https://github.com/${id}.png?size=96" class="w-12 h-12 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${reviewerNickname(id)}">`)
+    .map((id) => `<img src="https://github.com/${id}.png?size=96" class="w-10 h-10 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${reviewerNickname(id)}">`)
     .join('');
 
   const nameList = reviewerIds.map((id) => `'${reviewerNickname(id)}'`).join(', ');
   const githubUrl = documents[0]?.githubUrl ?? '#';
   const missionSlug = documents[0]?.mission ?? '';
   const missionName = missionSlug ? missionDisplayName(missionSlug) : '전체';
-  const content = highlightKeyword(representativeAnswer, state.search);
+  const html = marked.parse(representativeAnswer ?? '');
+  const content = highlightKeyword(html, state.search);
 
   const reviewerLine = nameList
     ? `이 질문에 대해 <span class="font-bold">${nameList}</span>님은 다음처럼 대답했어요`
     : '이 질문에 대한 리뷰어 답변';
 
   const defaultAvatar = !avatars
-    ? `<div class="w-12 h-12 rounded-full border-2 border-white ring-1 ring-gray-100 bg-[#EEEEEE] flex items-center justify-center">
+    ? `<div class="w-10 h-10 rounded-full border-2 border-white ring-1 ring-gray-100 bg-[#EEEEEE] flex items-center justify-center">
          <i class="fa-solid fa-users text-[#999999] text-sm"></i>
        </div>`
     : '';
 
   return `
-    <div class="group p-8 bg-white border border-[#EEEEEE] rounded-[24px] hover:border-black hover:shadow-xl transition-all duration-300">
-      <div class="flex items-start justify-between mb-6">
-        <div class="flex items-center gap-4">
-          <div class="flex -space-x-3">
+    <div class="group p-6 bg-white border border-[#EEEEEE] rounded-[20px] hover:border-black hover:shadow-xl transition-all duration-300">
+      <div class="flex items-start justify-between mb-5">
+        <div class="flex items-center gap-3">
+          <div class="flex -space-x-2">
             ${avatars || defaultAvatar}
           </div>
           <div>
-            <p class="text-[16px] text-[#1A1A1A]">${reviewerLine}</p>
+            <p class="text-[15px] text-[#1A1A1A]">${reviewerLine}</p>
             <p class="text-[13px] text-[#999999] mt-0.5">비슷한 답변 ${count}건 • ${missionName} 미션</p>
           </div>
         </div>
@@ -341,27 +372,28 @@ function buildCard(group) {
           href="${githubUrl}"
           target="_blank"
           rel="noopener noreferrer"
-          class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#F5F5F7] text-[14px] font-semibold group-hover:bg-black group-hover:text-white transition-all whitespace-nowrap shrink-0"
+          class="flex items-center gap-2 px-4 py-2 rounded-full bg-[#F5F5F7] text-[13px] font-semibold group-hover:bg-black group-hover:text-white transition-all whitespace-nowrap shrink-0"
         >
           <i class="fa-brands fa-github"></i>
           GitHub PR 보기
         </a>
       </div>
-      <div class="bg-[#F8F9FA] p-6 rounded-2xl">
-        <p class="text-[17px] leading-[1.7] text-[#333333]">
-          &ldquo;${content}&rdquo;
-        </p>
+      <div class="bg-[#F8F9FA] p-5 rounded-2xl">
+        <div class="prose prose-sm max-w-none prose-p:text-[#333333] prose-headings:text-[#1A1A1A] prose-code:text-[#1A1A1A] prose-pre:bg-[#EEEEEE]">
+          ${content}
+        </div>
       </div>
     </div>
   `;
 }
 
-function highlightKeyword(text, keyword) {
-  if (!keyword || !text) return text ?? '';
+function highlightKeyword(html, keyword) {
+  if (!keyword || !html) return html ?? '';
   const safePattern = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return text.replace(
-    new RegExp(`(${safePattern})`, 'gi'),
-    '<mark class="bg-yellow-100 font-medium rounded px-0.5">$1</mark>',
+  const regex = new RegExp(`(${safePattern})`, 'gi');
+  // HTML 태그(<...>)는 그대로 두고, 텍스트 노드에만 하이라이팅 적용
+  return html.replace(/(<[^>]*>)|([^<]+)/g, (_, tag, text) =>
+    tag ? tag : text.replace(regex, '<mark class="bg-yellow-100 font-medium rounded px-0.5">$1</mark>'),
   );
 }
 
@@ -371,16 +403,22 @@ function attachEventListeners() {
   const app = document.getElementById('app');
 
   app.addEventListener('click', async (e) => {
+    if (e.target.closest('#search-btn')) {
+      triggerSearch();
+      return;
+    }
+
     const trackBtn = e.target.closest('[data-track]');
     if (trackBtn) {
       const newTrack = trackBtn.dataset.track;
       if (state.track !== newTrack) {
         state.track = newTrack;
         state.mission = null;
+        state.results = null;
         state.displayCount = PAGE_SIZE;
         refreshFilterButtons();
+        renderResults();
         await loadMissions();
-        if (state.search) performSearch();
       }
       return;
     }
@@ -389,9 +427,10 @@ function attachEventListeners() {
     if (missionBtn) {
       const clicked = missionBtn.dataset.mission;
       state.mission = state.mission === clicked ? null : clicked;
+      state.results = null;
       state.displayCount = PAGE_SIZE;
       refreshFilterButtons();
-      if (state.search) performSearch();
+      renderResults();
       return;
     }
 
@@ -401,15 +440,10 @@ function attachEventListeners() {
     }
   });
 
-  let debounceTimer;
-  app.addEventListener('input', (e) => {
-    if (e.target.id !== 'search-input') return;
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      state.search = e.target.value.trim();
-      state.results = null;
-      performSearch();
-    }, 300);
+  app.addEventListener('keydown', (e) => {
+    if (e.target.id === 'search-input' && e.key === 'Enter') {
+      triggerSearch();
+    }
   });
 }
 

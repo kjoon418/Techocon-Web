@@ -1,5 +1,12 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 * {
   font-family: 'Pretendard', sans-serif;
+}
+
+/* prose 인라인 코드의 앞뒤 백틱 제거 */
+.prose :where(code):not(:where([class~="not-prose"] *))::before,
+.prose :where(code):not(:where([class~="not-prose"] *))::after {
+  content: '';
 }
