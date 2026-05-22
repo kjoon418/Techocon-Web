@@ -230,15 +230,15 @@ function buildLayout() {
     <div class="max-w-[1000px] w-full min-h-screen bg-white text-[#1A1A1A] mx-auto">
       <header class="sticky top-0 z-50 w-full h-[72px] bg-white/80 backdrop-blur-md border-b border-[#EEEEEE] flex items-center justify-between px-[40px]">
         <div class="flex items-center gap-2">
-          <img src="/logo.png" alt="Reveiwoowacourse 로고" class="w-9 h-9 object-contain">
-          <span class="text-lg font-bold tracking-tight">Reveiwoowacourse</span>
+          <img src="/logo.png" alt="finger PRincess 로고" class="w-9 h-9 object-contain">
+          <span class="text-lg font-bold tracking-tight">finger PRincess</span>
         </div>
       </header>
 
       <main class="px-[40px] py-[48px]">
         <section class="mb-[40px]">
           <h1 class="text-[38px] font-bold mb-3 leading-tight">리뷰어들은 이 질문에<br>어떻게 답변했을까요?</h1>
-          <p class="text-[16px] text-[#666666]">키워드를 입력하여 수천 개의 PR 속에 담긴 리뷰어의 인사이트를 찾아보세요.</p>
+          <p class="text-[16px] text-[#666666]">딸깍 한 번으로 수십 개의 PR에 담긴 리뷰을 확인해 보세요.</p>
         </section>
 
         <section class="grid grid-cols-2 gap-10 mb-[40px]">
@@ -298,10 +298,10 @@ function buildLayout() {
         <div class="flex justify-between items-start">
           <div>
             <div class="flex items-center gap-2 mb-4">
-              <img src="/logo.png" alt="Reveiwoowacourse 로고" class="w-7 h-7 object-contain">
-              <span class="text-base font-bold">Reveiwoowacourse</span>
+              <img src="/logo.png" alt="finger PRincess 로고" class="w-7 h-7 object-contain">
+              <span class="text-base font-bold">finger PRincess</span>
             </div>
-            <p class="text-[#999999] text-[13px]">© 2026 Reveiwoowacourse. 모든 리뷰 데이터는 공개된 GitHub PR을 기반으로 합니다.</p>
+            <p class="text-[#999999] text-[13px]">© 2026 finger PRincess. 모든 리뷰 데이터는 공개된 GitHub PR을 기반으로 합니다.</p>
           </div>
           <div class="flex gap-12">
             <div>
