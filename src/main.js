@@ -338,21 +338,27 @@ function buildCard(group) {
 
   // reviewerSections에서 리뷰어 정보 추출 (최대 3명), 없으면 documents 폴백
   const sections = reviewerSections.slice(0, 3);
+  const hasMore = reviewerSections.length > 3;
   const avatars = sections
     .map((s) => `<img src="https://github.com/${s.reviewer}.png?size=96" class="w-10 h-10 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${s.nickname ?? s.reviewer}">`)
     .join('');
 
-  const nameList = sections
-    .map((s) => `'${s.nickname ?? reviewerNickname(s.reviewer)}'`)
-    .join(', ');
+  const nameList = sections.length > 0
+    ? sections.map((s) => `'${s.nickname ?? reviewerNickname(s.reviewer)}'`).join(', ') + (hasMore ? ', ...' : '')
+    : '';
   const githubUrl = documents[0]?.githubUrl ?? '#';
   const missionSlug = documents[0]?.mission ?? '';
   const missionName = missionSlug ? missionDisplayName(missionSlug) : '전체';
   const html = marked.parse(representativeAnswer ?? '');
   const content = highlightKeyword(html, state.search);
 
+  const lastName = sections.length > 0
+    ? (sections[sections.length - 1].nickname ?? reviewerNickname(sections[sections.length - 1].reviewer))
+    : '';
+  const particle = hasMore ? '는' : eunNeun(lastName);
+
   const reviewerLine = nameList
-    ? `이 질문에 대해 <span class="font-bold">${nameList}</span>님은 다음처럼 대답했어요`
+    ? `이 질문에 대해 <span class="font-bold">${nameList}</span>${particle} 이렇게 말했어요`
     : '이 질문에 대한 리뷰어 답변';
 
   const defaultAvatar = !avatars
@@ -412,6 +418,16 @@ function buildCard(group) {
       ${reviewerFooter}
     </div>
   `;
+}
+
+// 끝 글자 받침 여부로 '는'/'은' 자동 선택
+function eunNeun(word) {
+  if (!word) return '은';
+  const code = word.charCodeAt(word.length - 1);
+  if (code >= 0xAC00 && code <= 0xD7A3) {
+    return (code - 0xAC00) % 28 === 0 ? '는' : '은';
+  }
+  return '는'; // 영문·숫자 등 비한글은 '는' 기본
 }
 
 function highlightKeyword(html, keyword) {
