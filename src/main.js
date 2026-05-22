@@ -402,8 +402,8 @@ function buildCard(group) {
             <p class="text-[13px] text-[#999999] mt-0.5">비슷한 답변 ${count}건 • ${missionName} 미션</p>
           </div>
         </div>
+        ${groupTitle ? `<span class="text-[15px] font-semibold text-[#444444] bg-[#F5F5F7] px-3 py-1.5 rounded-lg shrink-0 ml-4">${groupTitle}</span>` : ''}
       </div>
-      ${groupTitle ? `<p class="text-[14px] font-semibold text-[#1A1A1A] mb-3">${groupTitle}</p>` : ''}
       <div class="bg-[#F8F9FA] p-5 rounded-2xl">
         <div class="prose prose-sm max-w-none prose-p:text-[#333333] prose-headings:text-[#1A1A1A] prose-code:text-[#1A1A1A] prose-pre:bg-[#EEEEEE]">
           ${content}
