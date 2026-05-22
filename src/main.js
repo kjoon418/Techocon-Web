@@ -1,6 +1,6 @@
 import './style.css';
 import { searchReviews, getTracks, getMissions } from './api.js';
-import { trackLabel, missionDisplayName, missionIcon, FALLBACK_TRACKS } from './data.js';
+import { trackLabel, missionDisplayName, missionIcon, FALLBACK_TRACKS, reviewerNickname } from './data.js';
 
 const PAGE_SIZE = 5;
 
@@ -214,7 +214,7 @@ async function performSearch() {
       query: state.search,
       track: state.track,
       mission: state.mission,
-      limit: 50,
+      limit: 5,
     });
     state.results = results;
     state.loading = false;
@@ -306,10 +306,10 @@ function buildCard(group) {
   // reviewers는 문서별 string[] — 중복 제거 후 최대 3명 표시
   const reviewerIds = [...new Set(documents.flatMap((d) => d.reviewers ?? []))].slice(0, 3);
   const avatars = reviewerIds
-    .map((id) => `<img src="https://github.com/${id}.png?size=96" class="w-12 h-12 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${id}">`)
+    .map((id) => `<img src="https://github.com/${id}.png?size=96" class="w-12 h-12 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${reviewerNickname(id)}">`)
     .join('');
 
-  const nameList = reviewerIds.map((id) => `'${id}'`).join(', ');
+  const nameList = reviewerIds.map((id) => `'${reviewerNickname(id)}'`).join(', ');
   const githubUrl = documents[0]?.githubUrl ?? '#';
   const missionSlug = documents[0]?.mission ?? '';
   const missionName = missionSlug ? missionDisplayName(missionSlug) : '전체';
