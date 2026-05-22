@@ -1,4 +1,4 @@
-export const BASE_URL = 'http://localhost:8080';
+export const BASE_URL = 'http://localhost:8000';
 
 async function request(path, params = {}) {
   const url = new URL(BASE_URL + path);
@@ -19,8 +19,8 @@ async function request(path, params = {}) {
   return res.json();
 }
 
-export const searchReviews = ({ query, track, mission, limit = 50 }) =>
-  request('/api/search', { query, track, mission, limit });
+export const searchReviews = ({ query, track, mission, limit = 50, summarize = true }) =>
+  request('/api/search', { query, track, mission, limit, summarize });
 
 export const getConversation = (conversationId) =>
   request(`/api/conversations/${conversationId}`);

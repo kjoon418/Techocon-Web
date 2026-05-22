@@ -280,10 +280,10 @@ function renderResults() {
 
   if (!state.results) return;
 
-  const { query, totalGroups, groups } = state.results;
-  const visible = groups.slice(0, state.displayCount);
+  const { items } = state.results;
+  const visible = items.slice(0, state.displayCount);
 
-  titleEl.innerHTML = `'${query}'에 대한 리뷰어의 답변 <span class="text-[#999999] ml-2">${totalGroups}</span>`;
+  titleEl.innerHTML = `'${state.search}'에 대한 리뷰어의 답변 <span class="text-[#999999] ml-2">${items.length}</span>`;
   sortBar.classList.remove('hidden');
 
   if (visible.length === 0) {
@@ -297,24 +297,23 @@ function renderResults() {
     gridEl.innerHTML = visible.map(buildCard).join('');
   }
 
-  loadMoreBtn.classList.toggle('hidden', groups.length <= state.displayCount);
+  loadMoreBtn.classList.toggle('hidden', items.length <= state.displayCount);
 }
 
 function buildCard(group) {
-  const { reviewers = [], aiSummary, primaryGithubUrl, count, documents = [] } = group;
+  const { representativeAnswer, count, documents = [] } = group;
 
-  const avatars = reviewers.slice(0, 3).map((r) =>
-    r.avatarUrl
-      ? `<img src="${r.avatarUrl}" class="w-12 h-12 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${r.id}">`
-      : `<div class="w-12 h-12 rounded-full border-2 border-white ring-1 ring-gray-100 bg-[#EEEEEE] flex items-center justify-center shrink-0">
-           <span class="text-[#999999] text-sm font-semibold">${r.id.slice(0, 2).toUpperCase()}</span>
-         </div>`,
-  ).join('');
+  // reviewers는 문서별 string[] — 중복 제거 후 최대 3명 표시
+  const reviewerIds = [...new Set(documents.flatMap((d) => d.reviewers ?? []))].slice(0, 3);
+  const avatars = reviewerIds
+    .map((id) => `<img src="https://github.com/${id}.png?size=96" class="w-12 h-12 rounded-full border-2 border-white ring-1 ring-gray-100" alt="${id}">`)
+    .join('');
 
-  const nameList = reviewers.map((r) => `'${r.id}'`).join(', ');
+  const nameList = reviewerIds.map((id) => `'${id}'`).join(', ');
+  const githubUrl = documents[0]?.githubUrl ?? '#';
   const missionSlug = documents[0]?.mission ?? '';
   const missionName = missionSlug ? missionDisplayName(missionSlug) : '전체';
-  const content = highlightKeyword(aiSummary, state.search);
+  const content = highlightKeyword(representativeAnswer, state.search);
 
   const reviewerLine = nameList
     ? `이 질문에 대해 <span class="font-bold">${nameList}</span>님은 다음처럼 대답했어요`
@@ -339,7 +338,7 @@ function buildCard(group) {
           </div>
         </div>
         <a
-          href="${primaryGithubUrl}"
+          href="${githubUrl}"
           target="_blank"
           rel="noopener noreferrer"
           class="flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#F5F5F7] text-[14px] font-semibold group-hover:bg-black group-hover:text-white transition-all whitespace-nowrap shrink-0"
